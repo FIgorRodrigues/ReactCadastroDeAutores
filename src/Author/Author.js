@@ -2,9 +2,11 @@ import React, {Component} from 'react';
 import $ from 'jquery';
 import InputCustom from '../components/InputCustom';
 import ButtonCustom from '../components/ButtonCustom';
+import ManageErros from '../ManageErros/ManageErros';
 import PubSub from 'pubsub-js';
 import '../css/pure-min.css';
 import '../css/side-menu.css';
+import Menu from '../Menu/Menu';
 
 export class FormAuthor extends Component{
 
@@ -14,11 +16,13 @@ export class FormAuthor extends Component{
             name : '',
             email: '',
             password: '',
+            errors : ''
         };
         this.sendForm = this.sendForm.bind(this);
         this.setName = this.setName.bind(this);
         this.setEmail = this.setEmail.bind(this);
         this.setPassword = this.setPassword.bind(this);
+        this.resetForm = this.resetForm.bind(this);
     }
 
     sendForm(e){
@@ -28,16 +32,29 @@ export class FormAuthor extends Component{
             type: 'POST',
             contentType: 'application/json',
             dataType: 'json',
+            beforeSend : () => {
+                PubSub.publish('reset-messages-errors', '');
+            },
             data: JSON.stringify({
-            nome : this.state.name, 
-            email : this.state.email, 
-            senha : this.state.password
+                nome : this.state.name, 
+                email : this.state.email, 
+                senha : this.state.password
             })
         }).then(newListing => {
+            this.resetForm();
             PubSub.publish('list-authors-updated', newListing);
         }, error => {
-            console.log(error);
-        });
+            new ManageErros().publishErros(error);
+        }); 
+    }
+
+    resetForm(){
+        this.setState({
+            name : '',
+            email: '',
+            password: '',
+            errors : ''}
+        );
     }
     
     setName(e){
@@ -64,9 +81,9 @@ export class FormAuthor extends Component{
             </div>
         );
     }
-} 
+}
 
-export class TableAuthors extends Component{
+class TableAuthors extends Component{
 
     render(){
         return (
@@ -117,9 +134,15 @@ export default class AuthorBox extends Component{
 
     render(){
         return (
-            <div className="content" id="content">
-                <FormAuthor/>
-                <TableAuthors list={this.state.list}/>
+            <div id="mainAuthors">
+                <Menu/>
+                <div className="header">
+                <h1>Cadastro de Autores</h1>
+                </div>
+                <div className="content" id="contentAuthor">
+                    <FormAuthor/>
+                    <TableAuthors list={this.state.list}/>
+                </div>
             </div>
         );
     }

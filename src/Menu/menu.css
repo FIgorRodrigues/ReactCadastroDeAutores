@@ -1,0 +1,12 @@
+a{
+    color: #fff!important;
+}
+.pure-menu-link:hover{
+    background-color: rgba(0,159,224,0.2)!important;
+}
+.pure-menu-item{
+    background-color: none!important;
+}
+.pure-menu-link-action{
+    background-color: rgba(0,159,224,0.5)!important;
+}
